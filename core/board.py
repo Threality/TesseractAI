@@ -1,6 +1,12 @@
 import numpy as np
 from typing import Tuple
 
+"""
+- Consider using a bitboard to represent the game board
+- Consider using Numba for more performance
+- Pytest apparently lets me easily create testing data
+"""
+
 class Board:
     def __init__(self, size: int = 9):
         self.size = size
