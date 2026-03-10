@@ -22,7 +22,6 @@ class Board:
                             11: [1, -1, 1],
                             12: [1, -1, -1],
                         }
-
     
     def apply_move(self, move: Tuple[int, int], player: int) -> None:
         x, z = move
@@ -35,5 +34,19 @@ class Board:
     def reset(self) -> None:
         self.board = np.zeros((self.size, self.size, self.size))
 
-    def check_winner(self, move: Tuple[int, int, int]) -> bool:
+    def check_winner(self, move: Tuple[int, int, int], player: int) -> bool:
+        for i in range(13):
+            new_pos = move
+            dx, dy, dz = self.directions[i]
+            count = 0
+            while self.board[new_pos] == player:
+                count += 1
+                new_pos = move[0] + dx, move[1] + dy, move[2] + dz
+                if min(new_pos) < 0 or max(new_pos) >= self.size:
+                    break
+            if count >= 5:
+                return True
         return False
+    
+    def get_state(self, player: int):
+        return self.board * player
