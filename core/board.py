@@ -14,13 +14,13 @@ class Board:
         self.board = np.zeros((size, size, size))
     
 
-    def apply_move(self, move: Tuple[int, int], player: int) -> None:
+    def apply_move(self, move: Tuple[int, int], player: int) -> Tuple[int, int, int]:
         x, z = move
 
         for i in range(self.size):
             if self.board[x, i, z] == 0:
                 self.board[x, i, z] = player
-                return
+                return (x, i, z)
             
         raise RuntimeError("Played a move in an invalid place!")      
 
