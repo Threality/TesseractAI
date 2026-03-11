@@ -22,12 +22,13 @@ class Board:
                 self.board[x, i, z] = player
                 return (x, i, z)
             
-        raise RuntimeError("Played a move in an invalid place!")      
+        raise RuntimeError("Played a move in an invalid place!")    
 
+    def undo_move(self, move: Tuple[int, int, int]):  
+        self.board[move] = 0
 
     def reset(self) -> None:
         self.board = np.zeros((self.size, self.size, self.size))
-
 
     def check_winner(self, move: Tuple[int, int, int], player: int) -> bool:
         for i in range(13):
@@ -75,7 +76,6 @@ class Board:
     def get_state(self, player: int):
         return self.board * player
     
-
     def get_legal_moves(self) -> List[Tuple[int, int]]:
         out: List[Tuple[int, int]] = []
 

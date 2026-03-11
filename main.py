@@ -4,8 +4,8 @@ from agents.random_agent import RandomAgent
 
 def run_single_vs_game():
     board = Board(size=9)
-    agent1 = RandomAgent()
-    agent2 = RandomAgent()
+    agent1 = RandomAgent(1)
+    agent2 = RandomAgent(-1)
 
     game = Game(board, agent1, agent2)
     winner = game.play()

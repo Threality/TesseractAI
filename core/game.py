@@ -18,7 +18,7 @@ class Game:
         while True:
             active_agent = self.agent1 if self.cur_player == 1 else self.agent2
 
-            move = active_agent.get_move(self.board, self.cur_player)
+            move = active_agent.get_move(self.board)
 
             x, y, z = self.board.apply_move(move, self.cur_player)
             
