@@ -1,6 +1,7 @@
 from core.board import Board
 from core.constants import symbols
 from agents.base_agent import Agent
+from utils.visualiser import Visualiser
 
 class Game:
     def __init__(self, board: Board, agent_1: Agent, agent_2: Agent):
@@ -9,8 +10,10 @@ class Game:
         self.agent2 = agent_2
         self.cur_player = 1
     
-    def play(self, verbose=False, stepped=False):
+    def play(self, verbose=False, stepped=False, visualise=False):
         self.board.reset()
+        if visualise:
+            visualiser = Visualiser()
 
         while True:
             active_agent = self.agent1 if self.cur_player == 1 else self.agent2
@@ -21,6 +24,8 @@ class Game:
             
             if verbose:
                 self.print_board()
+            if visualise:
+                visualiser.plot_board(self.board) # type:ignore
 
             if self.board.check_winner((x, y, z), self.cur_player):
                 if verbose:

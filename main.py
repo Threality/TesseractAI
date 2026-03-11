@@ -8,7 +8,7 @@ def run_single_vs_game():
     agent2 = RandomAgent()
 
     game = Game(board, agent1, agent2)
-    winner = game.play(verbose=True)
+    winner = game.play(visualise=True)
     print(f"Game Over. Result: {winner}")
 
 if __name__ == "__main__":
