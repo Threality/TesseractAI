@@ -6,16 +6,12 @@ import numpy as np
 
 class Visualiser:
     def __init__(self):
-        # Initialize figure once for dynamic updates
-        plt.ion()  # turn on interactive mode
+        plt.ion()
         self.fig = plt.figure()
         self.ax = self.fig.add_subplot(111, projection='3d')
-        self.ax.set_box_aspect([1, 1, 1])
 
     def plot_board(self, board: Board):
         size = board.size
-
-        # Clear the previous scatter plot
         self.ax.cla()
 
         xs: List[float] = []
@@ -27,37 +23,31 @@ class Visualiser:
             for y in range(size):
                 for z in range(size):
                     val = board.board[x, y, z]
-
                     if val == 0:
                         continue
 
-                    # Swap axes: X and Z are floor, Y is height
-                    xs.append(x)
-                    ys.append(y)  # vertical
-                    zs.append(z)
+                    # Correct mapping: X/Z on floor, Y vertical
+                    xs.append(x)      # X-axis left-right
+                    ys.append(z)      # Z-axis (floor depth)
+                    zs.append(y)      # Y-axis vertical height
 
                     colors.append("red" if val == 1 else "blue")
 
-        # Convert to numpy arrays for matplotlib
         xs = np.array(xs, dtype=float) # type: ignore
         ys = np.array(ys, dtype=float) # type: ignore
         zs = np.array(zs, dtype=float) # type: ignore
 
-        # Plot
         self.ax.scatter(xs, ys, zs, c=colors, s=200)  # type: ignore
 
-        # Set labels
         self.ax.set_xlabel("X")
-        self.ax.set_ylabel("Y (Height)")
-        self.ax.set_zlabel("Z")
+        self.ax.set_ylabel("Z (Floor depth)")
+        self.ax.set_zlabel("Y (Height)")
 
-        # Set limits
         self.ax.set_xlim(0, size-1)
         self.ax.set_ylim(0, size-1)
         self.ax.set_zlim(0, size-1)
 
-        # Optional: fix the box aspect ratio so it looks cubic
         self.ax.set_box_aspect([size, size, size])
 
-        plt.draw()  # update the figure
-        plt.pause(0.01)  # small pause to allow the GUI to update
+        plt.draw()
+        plt.pause(0.01)
