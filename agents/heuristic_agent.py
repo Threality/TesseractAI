@@ -1,6 +1,7 @@
 from typing import Tuple, List
 from agents.base_agent import Agent
 from core.board import Board
+from heuristic.evaluator import full_board_evaluation
 
 class HeuristicAgent(Agent):
     def __init__(self, player: int, depth: int = 3):
@@ -11,13 +12,19 @@ class HeuristicAgent(Agent):
         best_score = float("inf")
         if self.player == 1:
             best_score = float("-inf")
-        best_move = None
+        best_move: Tuple[int, int] = (-1, -1)
         is_maximising = self.player == 1
 
         moves: List[Tuple[int, int]] = board.get_legal_moves()
+        if not moves:
+            raise RuntimeError("Called 'get_move' with no available moves")
+
         for move in moves:
             x, y, z = board.apply_move(move, self.player)
-            score = self.minimax(board, self.depth, is_maximising)
+            if board.check_winner((x, y, z), self.player):
+                board.undo_move((x, y, z))
+                return move
+            score = self.minimax(board, self.depth - 1, not is_maximising)
             board.undo_move((x, y, z))
             if is_maximising and score > best_score:
                 best_score = score
@@ -25,10 +32,33 @@ class HeuristicAgent(Agent):
             elif not is_maximising and score < best_score:
                 best_score = score
                 best_move = move
+
+        return best_move
             
     def minimax(self, board: Board, depth: int, is_maximising: bool) -> float:
+        best_score = float("inf")
+        if is_maximising:
+            best_score = float("-inf")
+        cur_player = 1 if is_maximising else -1
+
+        if depth <= 0:
+            return full_board_evaluation(board)
+
         moves = board.get_legal_moves()
         for move in moves:
-            x, y, z = board.apply_move(move, self.player)
-            score = self.minimax(board, self.depth, self.player==1)
+            x, y, z = board.apply_move(move, cur_player)
+            if board.check_winner((x, y, z), cur_player):
+                if is_maximising:
+                    best_score = 1_000_000
+                elif not is_maximising:
+                    best_score = -1_000_000
+                board.undo_move((x, y, z))
+                return best_score
+            score = self.minimax(board, depth - 1, not is_maximising)
+            if is_maximising and score > best_score:
+                best_score = score
+            elif not is_maximising and score < best_score:
+                best_score = score
             board.undo_move((x, y, z))
+
+        return best_score

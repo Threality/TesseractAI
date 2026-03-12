@@ -2,10 +2,10 @@ import numpy as np
 from core.constants import directions
 from core.board import Board
 
-def evaluate_board(self, player: int, board: Board):
+def evaluate_board(player: int, board: Board) -> int:
     score = 0
     for x, y, z in np.ndindex(board.board.shape):
-        if board.board[x, y, z] == 0:
+        if board.board[x, y, z] != player:
             continue
 
         for i in range(13):
@@ -16,10 +16,10 @@ def evaluate_board(self, player: int, board: Board):
             dx, dy, dz = directions[i]
             nx, ny, nz = x + dx, y + dy, z + dz
             while True:
-                if not (0 <= nx < self.size and 0 <= ny < self.size and 0 <= nz < self.size):
+                if not (0 <= nx < board.size and 0 <= ny < board.size and 0 <= nz < board.size):
                     break
                     
-                slot = self.board[nx, ny, nz]
+                slot = board.board[nx, ny, nz]
                 
                 if slot == player:
                     count += 1
@@ -35,10 +35,10 @@ def evaluate_board(self, player: int, board: Board):
             dx, dy, dz = -dx, -dy, -dz
             nx, ny, nz = x + dx, y + dy, z + dz
             while True:
-                if not (0 <= nx < self.size and 0 <= ny < self.size and 0 <= nz < self.size):
+                if not (0 <= nx < board.size and 0 <= ny < board.size and 0 <= nz < board.size):
                     break
                     
-                slot = self.board[nx, ny, nz]
+                slot = board.board[nx, ny, nz]
                 
                 if slot == player:
                     count += 1
@@ -51,9 +51,10 @@ def evaluate_board(self, player: int, board: Board):
                 nx, ny, nz = nx + dx, ny + dy, nz + dz
             
             # Check evals
-            score += self.score_sequence(count, open_ends)
+            score += score_sequence(count, open_ends)
+    return score
 
-def score_sequence(self, length: int, open_ends: int) -> int:
+def score_sequence(length: int, open_ends: int) -> int:
     if length >= 5:
         return 1_000_000
     
@@ -76,3 +77,6 @@ def score_sequence(self, length: int, open_ends: int) -> int:
             return 1
     
     return 0
+
+def full_board_evaluation(board) -> int:
+    return evaluate_board(1, board) - evaluate_board(-1, board)
