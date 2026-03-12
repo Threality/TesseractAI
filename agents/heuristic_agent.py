@@ -14,6 +14,8 @@ class HeuristicAgent(Agent):
             best_score = float("-inf")
         best_move: Tuple[int, int] = (-1, -1)
         is_maximising = self.player == 1
+        alpha = float("inf")
+        beta = float("-inf")
 
         moves: List[Tuple[int, int]] = board.get_legal_moves()
         if not moves:
@@ -24,18 +26,20 @@ class HeuristicAgent(Agent):
             if board.check_winner((x, y, z), self.player):
                 board.undo_move((x, y, z))
                 return move
-            score = self.minimax(board, self.depth - 1, not is_maximising)
+            score = self.minimax(board, self.depth - 1, not is_maximising, alpha, beta)
             board.undo_move((x, y, z))
             if is_maximising and score > best_score:
                 best_score = score
                 best_move = move
+                alpha = max(alpha, best_score)
             elif not is_maximising and score < best_score:
                 best_score = score
                 best_move = move
+                alpha = max(alpha, best_score)
 
         return best_move
-            
-    def minimax(self, board: Board, depth: int, is_maximising: bool) -> float:
+
+    def minimax(self, board: Board, depth: int, is_maximising: bool, alpha: float, beta: float) -> float:
         best_score = float("inf")
         if is_maximising:
             best_score = float("-inf")
@@ -50,15 +54,19 @@ class HeuristicAgent(Agent):
             if board.check_winner((x, y, z), cur_player):
                 if is_maximising:
                     best_score = 1_000_000
+                    alpha = max(best_score, alpha)
                 elif not is_maximising:
                     best_score = -1_000_000
+                    beta = min(best_score, beta)
                 board.undo_move((x, y, z))
                 return best_score
-            score = self.minimax(board, depth - 1, not is_maximising)
+            score = self.minimax(board, depth - 1, not is_maximising, alpha, beta)
             if is_maximising and score > best_score:
                 best_score = score
             elif not is_maximising and score < best_score:
                 best_score = score
             board.undo_move((x, y, z))
+            if beta <= alpha:
+                break
 
         return best_score
