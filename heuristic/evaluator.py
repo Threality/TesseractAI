@@ -56,11 +56,11 @@ def evaluate_board(player: int, board: Board) -> int:
 
 def score_sequence(length: int, open_ends: int) -> int:
     if length >= 5:
-        return 1_000_000
+        return 100_000_000
     
     if length == 4:
         if open_ends == 2:
-            return 100_000
+            return 1_000_000
         elif open_ends == 1:
             return 10_000
     

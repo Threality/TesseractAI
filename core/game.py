@@ -42,11 +42,11 @@ class Game:
 
     def print_board(self):
         size = self.board.size
-        for z in range(size):
-            print(f"\nLayer {z}")
+        for y in range(size):
+            print(f"\nLayer {y}")
             print("-" * (size * 2))
 
-            for y in reversed(range(size)):
+            for z in reversed(range(size)):
                 row = ""
                 for x in range(size):
                     row += symbols[self.board.board[x, y, z]] + " "

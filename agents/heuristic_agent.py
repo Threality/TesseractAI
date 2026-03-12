@@ -14,8 +14,8 @@ class HeuristicAgent(Agent):
             best_score = float("-inf")
         best_move: Tuple[int, int] = (-1, -1)
         is_maximising = self.player == 1
-        alpha = float("inf")
-        beta = float("-inf")
+        alpha = float("-inf")
+        beta = float("inf")
 
         moves: List[Tuple[int, int]] = board.get_legal_moves()
         if not moves:
@@ -35,7 +35,7 @@ class HeuristicAgent(Agent):
             elif not is_maximising and score < best_score:
                 best_score = score
                 best_move = move
-                alpha = max(alpha, best_score)
+                beta = min(beta, best_score)
 
         return best_move
 
@@ -53,18 +53,20 @@ class HeuristicAgent(Agent):
             x, y, z = board.apply_move(move, cur_player)
             if board.check_winner((x, y, z), cur_player):
                 if is_maximising:
-                    best_score = 1_000_000
+                    best_score = 100_000_000 + depth
                     alpha = max(best_score, alpha)
                 elif not is_maximising:
-                    best_score = -1_000_000
+                    best_score = -100_000_000 - depth
                     beta = min(best_score, beta)
                 board.undo_move((x, y, z))
                 return best_score
             score = self.minimax(board, depth - 1, not is_maximising, alpha, beta)
             if is_maximising and score > best_score:
                 best_score = score
+                alpha = max(best_score, alpha)
             elif not is_maximising and score < best_score:
                 best_score = score
+                beta = min(best_score, beta)
             board.undo_move((x, y, z))
             if beta <= alpha:
                 break
