@@ -85,6 +85,17 @@ class Board:
                     out.append((x, y))
 
         return out
+    
+    def filter_moves_by_range_from_last_move(self, moves: List[Tuple[int, int]], prev_move: Tuple[int, int], range: int =2) -> List[Tuple[int, int]]:
+        out: List[Tuple[int, int]] = []
+        if prev_move == (-1, -1):
+            return [(self.size // 2, self.size // 2)]
+        for move in moves:
+            if move[0] < prev_move[0] - range and move[0] > prev_move[0] + range:
+                if move[1] < prev_move[1] - range and move[1] > prev_move[1] + range:
+                    out.append(move)
+
+        return out
 
     # UTILITIES
 
