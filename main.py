@@ -1,12 +1,17 @@
+import random
 from core.board import Board
 from core.game import Game
 from agents.random_agent import RandomAgent
 from agents.heuristic_agent import HeuristicAgent
 
-def run_single_vs_game():
+def run_single_vs_game(seed=0):
+    if seed == 0:
+        rng = random.Random()
+    else:
+        rng = random.Random(seed)
     board = Board(size=9)
-    agent1 = HeuristicAgent(1, depth=3)
-    agent2 = HeuristicAgent(-1, depth=3)
+    agent1 = HeuristicAgent(1, depth=3, rng=rng)
+    agent2 = HeuristicAgent(-1, depth=3, rng=rng)
 
     game = Game(board, agent1, agent2)
     winner = game.play(visualise=True)

@@ -1,12 +1,14 @@
 from typing import Tuple, List
+import random
 from agents.base_agent import Agent
 from core.board import Board
 from heuristic.evaluator import full_board_evaluation
 
 class HeuristicAgent(Agent):
-    def __init__(self, player: int, depth: int = 3):
+    def __init__(self, player: int, depth: int = 3, rng=random.Random()):
         self.depth = depth
         self.player = player
+        self.rng = rng
 
     def get_move(self, board: Board) -> Tuple[int, int]:
         best_score = float("inf")
@@ -20,6 +22,7 @@ class HeuristicAgent(Agent):
         moves: List[Tuple[int, int]] = board.get_active_legal_moves()
         if not moves:
             raise RuntimeError("Called 'get_move' with no available moves")
+        moves.sort(key=lambda m: board.score_move_guess(m, self.player) + self.rng.uniform(0, 0.1), reverse=True)
 
         for move in moves:
             x, y, z = board.apply_move(move, self.player)
@@ -49,6 +52,7 @@ class HeuristicAgent(Agent):
             return full_board_evaluation(board)
 
         moves = board.get_active_legal_moves()
+        moves.sort(key=lambda m: board.score_move_guess(m, cur_player), reverse=True)
         for move in moves:
             x, y, z = board.apply_move(move, cur_player)
             if board.check_winner((x, y, z), cur_player):

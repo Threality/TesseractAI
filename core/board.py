@@ -35,7 +35,7 @@ class Board:
             dx, dy, dz = directions[i]
             nx, ny, nz = move[0] + dx, move[1] + dy, move[2] + dz
 
-            # Check direction (Count = -1 so the double +1 doesnt affect outcome)
+            # Check direction
             count = 1
             while True:
                 if not (0 <= nx < self.size and 0 <= ny < self.size and 0 <= nz < self.size):
@@ -97,21 +97,23 @@ class Board:
                     move = column[0] + x, column[1] + z
                     if max(move[0], move[1]) >= self.size or min(move[0], move[1]) < 0:
                         continue
-                    if self.is_column_full((x, z)):
+                    if self.is_column_full(move):
                         continue
                     out.add(move)
         return list(out)
     
-    def filter_moves_by_range_from_last_move(self, moves: List[Tuple[int, int]], prev_move: Tuple[int, int], range: int = 2) -> List[Tuple[int, int]]:
-        out: List[Tuple[int, int]] = []
-        if prev_move == (-1, -1):
-            return [(self.size // 2, self.size // 2)]
-        for move in moves:
-            if move[0] < prev_move[0] - range and move[1] > prev_move[1] + range:
-                if move[1] < prev_move[1] - range and move[1] > prev_move[1] + range:
-                    out.append(move)
-
-        return out
+    def score_move_guess(self, move: Tuple[int, int], player: int) -> float:
+        move_location = self.apply_move(move, player)
+        if self.check_winner(move_location, player):
+            self.undo_move(move_location)
+            return 1_000_000
+        self.undo_move(move_location)
+        move_location = self.apply_move(move, player * -1)
+        if self.check_winner(move_location, player * -1):
+            self.undo_move(move_location)
+            return 100_000
+        self.undo_move(move_location)
+        return 1 / max(0.5, (abs(move[0] - self.size // 2) + abs(move[1] - self.size // 2)))
 
     # UTILITIES
 

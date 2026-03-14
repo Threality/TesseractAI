@@ -74,7 +74,10 @@ def score_sequence(length: int, open_ends: int) -> int:
         if open_ends == 2:
             return 10
         elif open_ends == 1:
-            return 1
+            return 5
+        
+    if length == 1:
+        return 1
     
     return 0
 
