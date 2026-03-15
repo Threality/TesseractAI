@@ -47,7 +47,7 @@ class Game:
             print(f"\nLayer {y}")
             print("-" * (size * 2))
 
-            for z in range(size):
+            for z in reversed(range(size)):
                 row = ""
                 for x in range(size):
                     row += symbols[self.board.board[x, y, z]] + " "
