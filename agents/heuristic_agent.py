@@ -9,38 +9,52 @@ class HeuristicAgent(Agent):
         self.player = player
         self.rng = rng
         self.transposition_table = {}
+        self.good_moves = [(-1, -1)] * depth
 
     def get_move(self, board: Board) -> Tuple[int, int]:
-        best_score = float("inf")
-        if self.player == 1:
-            best_score = float("-inf")
-        best_move: Tuple[int, int] = (-1, -1)
+        overall_best_move: Tuple[int, int] = (-1, -1)
         is_maximising = self.player == 1
-        alpha = float("-inf")
-        beta = float("inf")
 
         moves: List[Tuple[int, int]] = board.get_active_legal_moves()
         if not moves:
             raise RuntimeError("Called 'get_move' with no available moves")
         moves.sort(key=lambda m: board.score_move_guess(m, self.player) + self.rng.uniform(0, 0.1), reverse=True)
 
-        for move in moves:
-            x, y, z = board.apply_move(move, self.player)
-            if board.check_winner((x, y, z), self.player):
-                board.undo_move((x, y, z))
-                return move
-            score = self.minimax(board, self.depth - 1, not is_maximising, alpha, beta)
-            board.undo_move((x, y, z))
-            if is_maximising and score > best_score:
-                best_score = score
-                best_move = move
-                alpha = max(alpha, best_score)
-            elif not is_maximising and score < best_score:
-                best_score = score
-                best_move = move
-                beta = min(beta, best_score)
+        for current_search_depth in range(1, self.depth + 1):
+            print(f"Searching at depth: {current_search_depth}")
+            alpha = float("-inf")
+            beta = float("inf")
+            best_score = float("-inf") if is_maximising else float("inf")
+            current_depth_best_move = moves[0]
 
-        return best_move
+            if board.current_hash in self.transposition_table:
+                _, _, _, stored_move = self.transposition_table[board.current_hash]
+                if stored_move in moves:
+                    moves.insert(0, moves.pop(moves.index(stored_move)))
+
+            for move in moves:
+                x, y, z = board.apply_move(move, self.player)
+                if board.check_winner((x, y, z), self.player):
+                    board.undo_move((x, y, z))
+                    return move
+                
+                score = self.minimax(board, current_search_depth - 1, not is_maximising, alpha, beta)
+                board.undo_move((x, y, z))
+
+                if is_maximising and score > best_score:
+                    best_score = score
+                    current_depth_best_move = move
+                    alpha = max(alpha, best_score)
+                elif not is_maximising and score < best_score:
+                    best_score = score
+                    current_depth_best_move = move
+                    beta = min(beta, best_score)
+            
+            overall_best_move = current_depth_best_move
+
+            flag = self.get_zobrist_flag(best_score, float("-inf"), float("inf"))
+            self.transposition_table[board.current_hash] = (best_score, current_search_depth, flag, overall_best_move)
+        return overall_best_move
 
     def minimax(self, board: Board, depth: int, is_maximising: bool, alpha: float, beta: float) -> float:
         best_score = float("inf")
@@ -68,13 +82,16 @@ class HeuristicAgent(Agent):
                 elif flag == 1: # Upperbound
                     beta = min(beta, cached_score)
                 if beta <= alpha:
+                    self.good_moves[depth] = stored_move
                     return cached_score
 
         moves = board.get_active_legal_moves()
-        moves.sort(key=lambda m: board.score_move_guess(m, cur_player), reverse=True)
         if stored_move in moves:
             i = moves.index(stored_move)
             moves[0], moves[i] = moves[i], moves[0]
+        if self.good_moves[depth] in moves:
+            i = moves.index(self.good_moves[depth])
+            moves[1], moves[i] = moves[i], moves[1]
             
         for move in moves:
             x, y, z = board.apply_move(move, cur_player)
@@ -98,6 +115,7 @@ class HeuristicAgent(Agent):
                 best_move = move
             board.undo_move((x, y, z))
             if beta <= alpha:
+                self.good_moves[depth] = move
                 break
             
         if  not best_move:

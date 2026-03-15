@@ -30,70 +30,50 @@ def score_sequence(length: int, open_ends: int) -> int:
     return 0
 
 def calculate_positions_score(move: Tuple[int, int, int], board) -> float:
-    score = 0
+    total_score = 0
+
     for i in range(13):
-            center = [board.board[move]]
-            left = []
-            right = []
-
-            # Check direction
+            # Set position to edge of that direction
             dx, dy, dz = directions[i]
-            nx, ny, nz = move[0] + dx, move[1] + dy, move[2] + dz
-            while True:
-                if not (0 <= nx < board.size and 0 <= ny < board.size and 0 <= nz < board.size):
-                    break
-                right.append(board.board[nx, ny, nz])
-                nx, ny, nz = nx + dx, ny + dy, nz + dz
 
-            # Check opposite direction
-            dx, dy, dz = -dx, -dy, -dz
-            nx, ny, nz = move[0] + dx, move[1] + dy, move[2] + dz
-            while True:
-                if not (0 <= nx < board.size and 0 <= ny < board.size and 0 <= nz < board.size):
-                    break
-                left.append(board.board[nx, ny, nz])
-                nx, ny, nz = nx + dx, ny + dy, nz + dz
+            # Go to the edge of the board
+            nx, ny, nz = move
+            while 0 <= nx < board.size and 0 <= ny < board.size and 0 <= nz < board.size:
+                nx, ny, nz = nx - dx, ny - dy, nz - dz
+            nx += dx
+            ny += dy
+            nz += dz
 
-            line = left[::-1] + center + right
-            score += evaluate_line(line)
-
-    return score
-
-def evaluate_line(line: List[int]) -> float:
-    i = 0
-    score = 0
-    while i < len(line):
-        length = 0
-        opens = 0
-        if line[i] == 0:
-            i += 1
-            continue
-        start = i
-        while i < len(line) and line[i] == 1:
-            length += 1
-            i += 1
-        end = i
-
-        if length != 0:
-            if start > 0 and line[start - 1] == 0:
-                opens = 1
-            if end < len(line) and line[end] == 0:
-                opens += 1
-            score += score_sequence(length, opens)
             length = 0
-            opens = 0
+            open_before = 0
+            current_player = board.board[nx, ny, nz]
 
-        start = i
-        while i < len(line) and line[i] == -1:
-            length += 1
-            i += 1
-        end = i
+            # Scan along the whole axis
+            while 0 <= nx < board.size and 0 <= ny < board.size and 0 <= nz < board.size:
+                slot = board.board[nx, ny, nz]
 
-        if length != 0:
-            if start > 0 and line[start - 1] == 0:
-                opens = 1
-            if end < len(line) and line[end] == 0:
-                opens += 1
-            score -= score_sequence(length, opens)
+                if slot == current_player and slot != 0:
+                    length += 1
+                else:
+                    if length > 0:
+                        open_after = 1 if slot == 0 else 0
+                        score = score_sequence(length, open_before + open_after)
+                        total_score += score if current_player == 1 else -score
+                    
+                    if slot == 0:
+                        open_before = 1
+                        current_player = 0
+                        length = 0
+                    else:
+                        open_before = 1 if current_player == 0 else 0
+                        current_player = slot
+                        length = 1
+                nx += dx
+                ny += dy
+                nz += dz
+            
+            if length > 0:
+                score = score_sequence(length, open_before)
+                total_score += score if current_player == 1 else -score
 
-    return score
+    return total_score
