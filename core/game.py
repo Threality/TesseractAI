@@ -24,6 +24,7 @@ class Game:
             
             if verbose:
                 self.print_board()
+                print(f"Current score: {self.board.current_score}")
             if visualise:
                 visualiser.plot_board(self.board) # type:ignore
 
@@ -42,11 +43,11 @@ class Game:
 
     def print_board(self):
         size = self.board.size
-        for y in range(size):
+        for y in reversed(range(size)):
             print(f"\nLayer {y}")
             print("-" * (size * 2))
 
-            for z in reversed(range(size)):
+            for z in range(size):
                 row = ""
                 for x in range(size):
                     row += symbols[self.board.board[x, y, z]] + " "

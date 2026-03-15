@@ -10,11 +10,11 @@ def score_sequence(length: int, open_ends: int) -> int:
         if open_ends == 2:
             return 1_000_000
         elif open_ends == 1:
-            return 10_000
+            return 50_000
     
     if length == 3:
         if open_ends == 2:
-            return 1000
+            return 10_000
         elif open_ends == 1:
             return 100
     

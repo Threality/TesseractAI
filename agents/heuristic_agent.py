@@ -9,8 +9,10 @@ class HeuristicAgent(Agent):
         self.player = player
         self.rng = rng
         self.transposition_table = {}
-        self.good_moves = [(-1, -1)] * depth
+        self.good_moves = [(-1, -1)] * (depth + 1)
         self.window_size = 50
+        self.extra_depth_requirement = 50_000
+        self.extra_depth_limit = 2
 
     def get_move(self, board: Board) -> Tuple[int, int]:
         overall_best_move: Tuple[int, int] = (-1, -1)
@@ -18,7 +20,6 @@ class HeuristicAgent(Agent):
         previous_score = 0
 
         for current_search_depth in range(1, self.depth + 1):
-            print(f"Searching at depth: {current_search_depth}")
             if current_search_depth == 1:
                 alpha = float("-inf")
                 beta = float("inf")
@@ -49,7 +50,7 @@ class HeuristicAgent(Agent):
                         board.undo_move((x, y, z))
                         return move
                     
-                    score = self.minimax(board, current_search_depth - 1, not is_maximising, alpha, beta)
+                    score = self.minimax(board, current_search_depth - 1, self.extra_depth_limit, not is_maximising, alpha, beta, 0)
                     board.undo_move((x, y, z))
 
                     if is_maximising and score > best_score:
@@ -70,11 +71,9 @@ class HeuristicAgent(Agent):
                     overall_best_move = current_depth_best_move
                     break
 
-                flag = self.get_zobrist_flag(best_score, float("-inf"), float("inf"))
-                self.transposition_table[board.current_hash] = (best_score, current_search_depth, flag, overall_best_move)
         return overall_best_move
 
-    def minimax(self, board: Board, depth: int, is_maximising: bool, alpha: float, beta: float) -> float:
+    def minimax(self, board: Board, depth: int, extension: int, is_maximising: bool, alpha: float, beta: float, previous_score: float) -> float:
         best_score = float("inf")
         if is_maximising:
             best_score = float("-inf")
@@ -122,7 +121,10 @@ class HeuristicAgent(Agent):
                     beta = min(best_score, beta)
                 board.undo_move((x, y, z))
                 return best_score
-            score = self.minimax(board, depth - 1, not is_maximising, alpha, beta)
+            if abs(board.current_score - previous_score) > self.extra_depth_requirement and extension > 0 and depth == 1:
+                score = self.minimax(board, depth, extension -1, not is_maximising, alpha, beta, board.current_score)
+            else:
+                score = self.minimax(board, depth - 1, extension, not is_maximising, alpha, beta, board.current_score)
             if is_maximising and score > best_score:
                 best_score = score
                 alpha = max(best_score, alpha)
