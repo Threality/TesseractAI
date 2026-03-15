@@ -136,7 +136,7 @@ class HeuristicAgent(Agent):
                 self.good_moves[depth] = move
                 break
             
-        if  not best_move:
+        if not best_move:
             best_move = moves[0]
         flag = self.get_zobrist_flag(best_score, original_alpha, original_beta)
         self.transposition_table[board.current_hash] = (best_score, depth, flag, best_move)
