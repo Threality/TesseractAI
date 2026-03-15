@@ -9,6 +9,7 @@ class HeuristicAgent(Agent):
         self.depth = depth
         self.player = player
         self.rng = rng
+        self.transposition_table = {}
 
     def get_move(self, board: Board) -> Tuple[int, int]:
         best_score = float("inf")
@@ -47,12 +48,35 @@ class HeuristicAgent(Agent):
         if is_maximising:
             best_score = float("-inf")
         cur_player = 1 if is_maximising else -1
+        original_alpha = alpha
+        original_beta = beta
+        best_move = ()
+        stored_move: Tuple[int, int] = (-1, -1)
+
+        if len(self.transposition_table) > 1_000_000:
+            self.transposition_table.clear()
 
         if depth <= 0:
             return full_board_evaluation(board)
+        
+        if board.current_hash in self.transposition_table:
+            cached_score, f_depth, flag, stored_move = self.transposition_table[board.current_hash]
+            if f_depth >= depth:
+                if flag == 0: # Exact
+                    return cached_score
+                if flag == -1: # Lowerbound
+                    alpha = max(alpha, cached_score)
+                elif flag == 1: # Upperbound
+                    beta = min(beta, cached_score)
+                if beta <= alpha:
+                    return cached_score
 
         moves = board.get_active_legal_moves()
         moves.sort(key=lambda m: board.score_move_guess(m, cur_player), reverse=True)
+        if stored_move in moves:
+            i = moves.index(stored_move)
+            moves[0], moves[i] = moves[i], moves[0]
+            
         for move in moves:
             x, y, z = board.apply_move(move, cur_player)
             if board.check_winner((x, y, z), cur_player):
@@ -68,11 +92,25 @@ class HeuristicAgent(Agent):
             if is_maximising and score > best_score:
                 best_score = score
                 alpha = max(best_score, alpha)
+                best_move = move
             elif not is_maximising and score < best_score:
                 best_score = score
                 beta = min(best_score, beta)
+                best_move = move
             board.undo_move((x, y, z))
             if beta <= alpha:
                 break
-
+            
+        if best_move:
+            flag = self.get_zobrist_flag(best_score, original_alpha, original_beta)
+            self.transposition_table[board.current_hash] = (best_score, depth, flag, best_move)
+        
         return best_score
+    
+    def get_zobrist_flag(self, best_score: float, alpha: float, beta: float) -> int:
+        if best_score <= alpha:
+            return 1
+        if best_score >= beta:
+            return -1
+        else:
+            return 0

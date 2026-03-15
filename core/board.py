@@ -1,4 +1,5 @@
 import numpy as np
+import random
 from typing import Tuple, List
 from core.constants import directions
 
@@ -12,7 +13,14 @@ class Board:
     def __init__(self, size: int = 9):
         self.size: int = size
         self.board = np.zeros((size, size, size))
-    
+        self.current_hash = 0
+        self.zobrist_table = {}
+
+        for x in range(size):
+            for y in range(size):
+                for z in range(size):
+                    self.zobrist_table[(x, y, z, 1)] = random.getrandbits(64)
+                    self.zobrist_table[(x, y, z, -1)] = random.getrandbits(64)
 
     def apply_move(self, move: Tuple[int, int], player: int) -> Tuple[int, int, int]:
         x, z = move
@@ -20,11 +28,14 @@ class Board:
         for i in range(self.size):
             if self.board[x, i, z] == 0:
                 self.board[x, i, z] = player
+                self.current_hash ^= self.zobrist_table[(x, i, z, player)]
                 return (x, i, z)
-            
+
         raise RuntimeError("Played a move in an invalid place!")    
 
     def undo_move(self, move: Tuple[int, int, int]):  
+        player = self.board[move]
+        self.current_hash ^= self.zobrist_table[(move[0], move[1], move[2], player)]
         self.board[move] = 0
 
     def reset(self) -> None:
@@ -58,17 +69,16 @@ class Board:
                     count += 1
                 else:
                     break
-                    
                 nx, ny, nz = nx + dx, ny + dy, nz + dz
             if count >= 5:
                 return True
         return False
-    
+
     # AI TOOLS
 
     def get_state(self, player: int):
         return self.board * player
-    
+
     def get_legal_moves(self) -> List[Tuple[int, int]]:
         out: List[Tuple[int, int]] = []
 
@@ -90,7 +100,7 @@ class Board:
 
         if not active_columns:
             return [(self.size // 2, self.size // 2)]
-        
+
         for column in active_columns:
             for x in range(-radius, radius + 1):
                 for z in range(-radius, radius + 1):
@@ -101,7 +111,7 @@ class Board:
                         continue
                     out.add(move)
         return list(out)
-    
+
     def score_move_guess(self, move: Tuple[int, int], player: int) -> float:
         move_location = self.apply_move(move, player)
         if self.check_winner(move_location, player):
