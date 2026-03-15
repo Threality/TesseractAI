@@ -2,7 +2,6 @@ from typing import Tuple, List
 import random
 from agents.base_agent import Agent
 from core.board import Board
-from heuristic.evaluator import full_board_evaluation
 
 class HeuristicAgent(Agent):
     def __init__(self, player: int, depth: int = 3, rng=random.Random()):
@@ -57,7 +56,7 @@ class HeuristicAgent(Agent):
             self.transposition_table.clear()
 
         if depth <= 0:
-            return full_board_evaluation(board)
+            return board.current_score
         
         if board.current_hash in self.transposition_table:
             cached_score, f_depth, flag, stored_move = self.transposition_table[board.current_hash]
@@ -101,9 +100,10 @@ class HeuristicAgent(Agent):
             if beta <= alpha:
                 break
             
-        if best_move:
-            flag = self.get_zobrist_flag(best_score, original_alpha, original_beta)
-            self.transposition_table[board.current_hash] = (best_score, depth, flag, best_move)
+        if  not best_move:
+            best_move = moves[0]
+        flag = self.get_zobrist_flag(best_score, original_alpha, original_beta)
+        self.transposition_table[board.current_hash] = (best_score, depth, flag, best_move)
         
         return best_score
     

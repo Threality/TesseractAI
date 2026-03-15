@@ -2,6 +2,7 @@ import numpy as np
 import random
 from typing import Tuple, List
 from core.constants import directions
+from heuristic import evaluator
 
 """
 - Consider using a bitboard to represent the game board
@@ -15,6 +16,8 @@ class Board:
         self.board = np.zeros((size, size, size))
         self.current_hash = 0
         self.zobrist_table = {}
+        self.current_score = 0
+        self.score_history= []
 
         for x in range(size):
             for y in range(size):
@@ -27,7 +30,11 @@ class Board:
 
         for i in range(self.size):
             if self.board[x, i, z] == 0:
+                before = evaluator.calculate_positions_score((x, i, z), self)
                 self.board[x, i, z] = player
+                after = evaluator.calculate_positions_score((x, i, z), self)
+                self.score_history.append(self.current_score)
+                self.current_score += after - before
                 self.current_hash ^= self.zobrist_table[(x, i, z, player)]
                 return (x, i, z)
 
@@ -37,6 +44,7 @@ class Board:
         player = self.board[move]
         self.current_hash ^= self.zobrist_table[(move[0], move[1], move[2], player)]
         self.board[move] = 0
+        self.current_score = self.score_history.pop()
 
     def reset(self) -> None:
         self.board = np.zeros((self.size, self.size, self.size))
