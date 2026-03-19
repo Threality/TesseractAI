@@ -8,6 +8,7 @@ from heuristic import evaluator
 - Consider using a bitboard to represent the game board
 - Consider using Numba for more performance
 - Pytest apparently lets me easily create testing data
+- Also consider weighting opens less when the open move is not valid yet i.e. no support
 """
 
 class Board:

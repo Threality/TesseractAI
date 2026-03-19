@@ -27,7 +27,7 @@ class Board:
         x, z = move
         for i in range(self.size):
             if self.board[x, i, z] == 0:
-                self.board[x, i, z] = player
+                self.board[x][i][z] = player
                 return
         raise RuntimeError("Played a move in an invalid place!")      
 
