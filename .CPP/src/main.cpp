@@ -1,15 +1,15 @@
 #include <iostream>
 
-#include "board.h"
-#include "agent.h"
+#include "board/board.h"
+#include "agents/random_agent.h"
 #include "game.h"
 
 void run_single_game()
 {
     Board board;
 
-    Agent agent1(1);
-    Agent agent2(-1);
+    RandomAgent agent1(1);
+    RandomAgent agent2(-1);
 
     Game game(board, &agent1, &agent2);
     int winner = game.play(true);

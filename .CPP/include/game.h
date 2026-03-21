@@ -1,7 +1,7 @@
 #pragma once
 
-#include "board.h"
-#include "agent.h"
+#include "board/board.h"
+#include "agents/agent.h"
 
 class Game
 {

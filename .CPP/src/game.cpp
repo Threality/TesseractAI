@@ -18,6 +18,7 @@ int Game::play(bool verbose)
         std::array<int8_t, 2> move = active_agent->get_move(board);
 
         Move final_move = board.apply_move(move[0], move[1], cur_player);
+        board.print_board();
 
         if (board.check_winner(final_move, cur_player))
         {
