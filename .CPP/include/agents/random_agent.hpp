@@ -2,7 +2,7 @@
 
 #include <random>
 
-#include "agents/agent.h"
+#include "agents/agent.hpp"
 
 class RandomAgent : public Agent
 {

@@ -1,6 +1,6 @@
 #include <iostream>
 
-#include "game.h"
+#include "game.hpp"
 
 Game::Game(Board& board, Agent* a1, Agent* a2)
     : board(board), agent1(a1), agent2(a2) {}

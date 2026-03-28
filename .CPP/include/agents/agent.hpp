@@ -2,8 +2,8 @@
 
 #include <cstdint>
 
-#include "constants.h"
-#include "board/board.h"
+#include "constants.hpp"
+#include "board/board.hpp"
 
 class Agent
 {

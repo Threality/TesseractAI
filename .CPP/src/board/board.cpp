@@ -1,11 +1,29 @@
 #include <cstdint>
 #include <stdexcept>
 #include <iostream>
+#include <random>
 
-#include "board/board.h"
-#include "constants.h"
+#include "board/board.hpp"
+#include "constants.hpp"
 
 #pragma region Game
+
+Board::Board()
+{
+    std::mt19937_64 rng(std::random_device{}());
+
+    for (int8_t x = 0; x < SIZE_X; x++)
+    {
+        for (int8_t y = 0; y < SIZE_Y; y++)
+        {
+            for (int8_t z = 0; z < SIZE_Z; z++)
+            {
+                zobrist_table[x][y][z][0] = rng();
+                zobrist_table[x][y][z][1] = rng();
+            }
+        }
+    }
+}
 
 Move Board::apply_move(const int8_t& x, const int8_t& z, const int8_t& player)
 {
@@ -137,4 +155,9 @@ const std::vector<std::array<int8_t, 2>> Board::get_legal_moves()
     }
 
     return out;
+}
+
+const float Board::score_move_guess(std::array<int8_t, 2>, int8_t player)
+{
+    return 0.0;
 }

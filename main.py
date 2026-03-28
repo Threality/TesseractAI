@@ -10,9 +10,10 @@ def run_single_vs_game(seed=0):
     else:
         rng = random.Random(seed)
     board = Board(size=6)
-    # agent1 = PlayerAgent(1, "Fin")
-    agent1 = HeuristicAgent(1, depth=4, rng=rng)
-    agent2 = HeuristicAgent(-1, depth=4, rng=rng)
+    agent1 = PlayerAgent(1, "Ryan")
+    agent2 = PlayerAgent(-1, "Eliot")
+    # agent1 = HeuristicAgent(1, depth=4, rng=rng)
+    # agent2 = HeuristicAgent(-1, depth=4, rng=rng)
 
     game = Game(board, agent1, agent2)
     winner = game.play(verbose=True)

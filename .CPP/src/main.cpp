@@ -1,8 +1,8 @@
 #include <iostream>
 
-#include "board/board.h"
-#include "agents/random_agent.h"
-#include "game.h"
+#include "board/board.hpp"
+#include "agents/random_agent.hpp"
+#include "game.hpp"
 
 void run_single_game()
 {

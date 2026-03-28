@@ -1,4 +1,6 @@
-#include "agents/random_agent.h"
+#include "agents/random_agent.hpp"
+
+#include <stdexcept>
 
 RandomAgent::RandomAgent(int8_t player)
     : Agent(player), rng(std::random_device{}()) {}

@@ -4,11 +4,13 @@
 #include <vector>
 #include <cstdint>
 
-#include "constants.h"
+#include "constants.hpp"
 
 class Board
 {
 public:
+    Board();
+
     static constexpr int SIZE_X = 9;
     static constexpr int SIZE_Y = 9;
     static constexpr int SIZE_Z = 9;
@@ -20,8 +22,13 @@ public:
     const bool is_within_bounds(const int8_t& x, const int8_t& y, const int8_t& z);
     const std::vector<std::array<int8_t, 2>> get_legal_moves();
     const void print_board();
+    const float score_move_guess(std::array<int8_t, 2> move, int8_t player);
     void reset();
 
 private:
     std::array<std::array<std::array<int8_t, SIZE_Z>, SIZE_Y>, SIZE_X> board{};
+    double current_hash = 0;
+    std::array<std::array<std::array<std::array<uint64_t, 2>, SIZE_X>, SIZE_Y>, SIZE_Z> zobrist_table;
+    double current_score = 0;
+    std::vector<double> score_history {};
 };
